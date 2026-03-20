@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Outreach Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0d0f;
+    --bg2: #141518;
+    --bg3: #1c1e22;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f0ee;
+    --text2: #8a8a85;
+    --text3: #555550;
+    --accent: #c9a84c;
+    --accent2: #1a2744;
+    --green: #4ade80;
+    --green-bg: rgba(74,222,128,0.08);
+    --blue: #60a5fa;
+    --blue-bg: rgba(96,165,250,0.08);
+    --red: #f87171;
+    --red-bg: rgba(248,113,113,0.08);
+    --amber: #fbbf24;
+    --amber-bg: rgba(251,191,36,0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* TOP NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-logo {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: #0c0d0f;
+  }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .btn-sync {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 14px;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: var(--radius-sm);
+    color: var(--accent);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-sync:hover { background: rgba(201,168,76,0.2); }
+  .btn-sync svg { width: 14px; height: 14px; }
+  .sync-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .last-sync { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+  /* MAIN LAYOUT */
+  main { padding: 28px; max-width: 1400px; margin: 0 auto; }
+
+  /* HEADER SECTION */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+    gap: 20px;
+  }
+  .page-title { font-size: 22px; font-weight: 500; letter-spacing: -0.3px; }
+  .page-sub { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .header-actions { display: flex; gap: 10px; flex-shrink: 0; }
+  .btn-primary {
+    padding: 9px 18px;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #0c0d0f;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-outline {
+    padding: 9px 18px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text2);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-outline:hover { border-color: var(--border2); background: var(--bg3); color: var(--text); }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .kpi-card:hover { border-color: var(--border2); }
+  .kpi-label { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; margin-bottom: 10px; }
+  .kpi-value { font-size: 32px; font-weight: 500; letter-spacing: -1px; line-height: 1; }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.amber { color: var(--amber); }
+  .kpi-value.blue { color: var(--blue); }
+  .kpi-value.accent { color: var(--accent); }
+  .kpi-sub { font-size: 12px; color: var(--text3); margin-top: 8px; font-family: 'DM Mono', monospace; }
+  .kpi-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.8s ease;
+  }
+  .kpi-bar.green { background: var(--green); }
+  .kpi-bar.blue { background: var(--blue); }
+  .kpi-bar.amber { background: var(--amber); }
+
+  /* CONTENT GRID */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* PANEL */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-title { font-size: 14px; font-weight: 500; }
+  .panel-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* SEARCH + FILTER BAR */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .search-wrap { position: relative; flex: 1; max-width: 280px; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text3); }
+  .search-input {
+    width: 100%;
+    padding: 7px 10px 7px 32px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--border2); }
+  .search-input::placeholder { color: var(--text3); }
+  .filter-chips { display: flex; gap: 6px; }
+  .chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #0c0d0f; }
+  .chip:not(.active):hover { border-color: var(--border2); color: var(--text); }
+  .count-badge {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 8px;
+    color: var(--text2);
+    margin-left: auto;
+  }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 11px 20px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+  tbody td {
+    padding: 13px 20px;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .td-name { font-weight: 500; color: var(--text); }
+  .td-company { color: var(--text2); }
+  .td-email { color: var(--text3); font-family: 'DM Mono', monospace; font-size: 12px; }
+  .td-type {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--blue);
+    white-space: nowrap;
+    display: inline-block;
+  }
+  .td-date { color: var(--text3); font-family: 'DM Mono', monospace; font-size: 11px; }
+
+  /* STATUS BADGE */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge-dot { width: 5px; height: 5px; border-radius: 50%; }
+  .badge.sent { background: var(--green-bg); color: var(--green); border: 1px solid rgba(74,222,128,0.2); }
+  .badge.sent .badge-dot { background: var(--green); }
+  .badge.pending { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(251,191,36,0.2); }
+  .badge.pending .badge-dot { background: var(--amber); animation: pulse 2s infinite; }
+  .badge.error { background: var(--red-bg); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+  .badge.error .badge-dot { background: var(--red); }
+
+  /* SIDEBAR PANELS */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+  /* MINI CHART */
+  .chart-wrap { padding: 16px 20px 20px; }
+  .chart-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; font-weight: 500; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+  .bar-fill {
+    width: 100%;
+    border-radius: 3px 3px 0 0;
+    background: var(--accent);
+    opacity: 0.7;
+    transition: opacity 0.15s;
+    min-height: 4px;
+  }
+  .bar-fill:hover { opacity: 1; }
+  .bar-fill.green { background: var(--green); }
+  .bar-day { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+  /* ACTIVITY FEED */
+  .activity-list { padding: 4px 0; }
+  .activity-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+    transition: background 0.1s;
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-item:hover { background: var(--bg3); }
+  .activity-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .activity-icon.sent { background: var(--green-bg); }
+  .activity-icon.error { background: var(--red-bg); }
+  .activity-icon.info { background: var(--blue-bg); }
+  .activity-body { flex: 1; min-width: 0; }
+  .activity-text { font-size: 13px; color: var(--text); line-height: 1.4; }
+  .activity-text strong { color: var(--text); font-weight: 500; }
+  .activity-time { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+  /* PROGRESS RING */
+  .progress-section { padding: 20px; text-align: center; }
+  .ring-wrap { position: relative; width: 100px; height: 100px; margin: 0 auto 16px; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .ring-pct { font-size: 20px; font-weight: 500; color: var(--accent); letter-spacing: -0.5px; }
+  .ring-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .progress-stats { display: flex; justify-content: space-around; }
+  .p-stat-val { font-size: 18px; font-weight: 500; }
+  .p-stat-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* TYPE BREAKDOWN */
+  .type-list { padding: 8px 0; }
+  .type-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-row:hover { background: var(--bg3); }
+  .type-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .type-name { flex: 1; font-size: 13px; color: var(--text2); }
+  .type-count { font-size: 13px; font-weight: 500; font-family: 'DM Mono', monospace; }
+  .type-bar-wrap { width: 60px; }
+  .type-bar { height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; }
+  .type-bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text3);
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-text { font-size: 14px; }
+
+  /* LOADING */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(12,13,15,0.8);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 13px; color: var(--text2); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--text);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.25s;
+    z-index: 300;
+    max-width: 320px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: rgba(74,222,128,0.3); }
+  .toast.error { border-color: rgba(248,113,113,0.3); }
+
+  /* MODAL */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(12,13,15,0.85);
+    z-index: 150;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    padding: 28px;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+  }
+  .modal-title { font-size: 17px; font-weight: 500; margin-bottom: 20px; }
+  .modal-close {
+    position: absolute;
+    top: 18px; right: 18px;
+    background: none; border: none;
+    color: var(--text3); cursor: pointer; font-size: 18px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--text); }
+  .detail-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-key { font-size: 12px; color: var(--text3); width: 110px; flex-shrink: 0; padding-top: 1px; }
+  .detail-val { font-size: 13px; color: var(--text); word-break: break-all; }
+
+  /* INSTRUCTIONS PANEL */
+  .instructions {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-top: 16px;
+  }
+  .instructions h3 { font-size: 15px; font-weight: 500; margin-bottom: 16px; color: var(--accent); }
+  .step { display: flex; gap: 14px; margin-bottom: 16px; }
+  .step-num {
+    width: 24px; height: 24px;
+    background: rgba(201,168,76,0.15);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: var(--accent);
+    flex-shrink: 0;
+  }
+  .step-body { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .step-body code {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--accent);
+  }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .content-grid { grid-template-columns: 1fr; }
+    .sidebar { flex-direction: row; flex-wrap: wrap; }
+    .sidebar .panel { flex: 1; min-width: 280px; }
+    nav { padding: 0 16px; }
+    main { padding: 16px; }
+  }
+  @media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .page-header { flex-direction: column; }
+    .header-actions { width: 100%; }
+    .header-actions button { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text">Buscando dados da planilha...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-backdrop" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('show')">✕</button>
+    <div class="modal-title" id="modal-title">Detalhes do Contato</div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<nav>
+  <a class="nav-brand" href="#">
+    <div class="nav-logo">JO</div>
+    Job Outreach
+  </a>
+  <div class="nav-right">
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="sync-dot" id="syncDot"></div>
+      <span class="last-sync" id="lastSync">—</span>
+    </div>
+    <button class="btn-sync" onclick="loadData()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+      Atualizar
+    </button>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div>
+      <div class="page-title">Dashboard de Candidaturas</div>
+      <div class="page-sub">Monitore seus envios em tempo real via Google Sheets</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-outline" onclick="exportCSV()">Exportar CSV</button>
+      <button class="btn-primary" onclick="openSheets()">Abrir Planilha</button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Total de Contatos</div>
+      <div class="kpi-value accent" id="kpi-total">—</div>
+      <div class="kpi-sub" id="kpi-total-sub">carregando...</div>
+      <div class="kpi-bar amber" id="bar-total" style="width:0%"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Emails Enviados</div>
+      <div class="kpi-value green" id="kpi-sent">—</div>
+      <div class="kpi-sub" id="kpi-sent-sub">carregando...</div>
+      <div class="kpi-bar green" id="bar-sent" style="width:0%"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Aguardando Envio</div>
+      <div class="kpi-value amber" id="kpi-pending">—</div>
+      <div class="kpi-sub" id="kpi-pending-sub">carregando...</div>
+      <div class="kpi-bar amber" id="bar-pending" style="width:0%"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Taxa de Envio</div>
+      <div class="kpi-value blue" id="kpi-rate">—</div>
+      <div class="kpi-sub" id="kpi-rate-sub">carregando...</div>
+      <div class="kpi-bar blue" id="bar-rate" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content-grid">
+    <!-- TABLE PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Lista de Contatos</div>
+        <div class="panel-actions">
+          <span class="count-badge" id="table-count">0 contatos</span>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Buscar por nome, empresa..." oninput="filterTable()">
+        </div>
+        <div class="filter-chips">
+          <button class="chip active" data-filter="all" onclick="setFilter(this,'all')">Todos</button>
+          <button class="chip" data-filter="sent" onclick="setFilter(this,'sent')">Enviados</button>
+          <button class="chip" data-filter="pending" onclick="setFilter(this,'pending')">Pendentes</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Empresa</th>
+              <th>Tipo Candidatura</th>
+              <th>Status</th>
+              <th>Data Envio</th>
+              <th>Currículo</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">◌</div><div class="empty-text">Carregando dados...</div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <!-- PROGRESS -->
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Progresso Geral</div></div>
+        <div class="progress-section">
+          <div class="ring-wrap">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#c9a84c" stroke-width="8"
+                stroke-dasharray="239" stroke-dashoffset="239" stroke-linecap="round"
+                id="ringCircle" style="transition:stroke-dashoffset 1s ease"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-pct" id="ringPct">0%</div>
+              <div class="ring-lbl">enviado</div>
+            </div>
+          </div>
+          <div class="progress-stats">
+            <div style="text-align:center">
+              <div class="p-stat-val green" id="stat-sent">0</div>
+              <div class="p-stat-lbl">Enviados</div>
+            </div>
+            <div style="text-align:center">
+              <div class="p-stat-val amber" id="stat-pending">0</div>
+              <div class="p-stat-lbl">Pendentes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TYPE BREAKDOWN -->
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Por Tipo de Candidatura</div></div>
+        <div class="type-list" id="typeBreakdown">
+          <div class="type-row"><div class="type-name" style="color:var(--text3)">Sem dados</div></div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY -->
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Atividade Recente</div></div>
+        <div class="activity-list" id="activityFeed">
+          <div class="activity-item"><div class="activity-body"><div class="activity-text" style="color:var(--text3)">Carregando...</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUP INSTRUCTIONS -->
+  <div class="instructions" id="setupGuide">
+    <h3>Como publicar com dados reais</h3>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong style="color:var(--text)">Configure a API Key do Google Sheets</strong><br>
+        Acesse <a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent)">console.cloud.google.com</a> → APIs & Services → Credentials → Criar chave de API. Ative a <strong style="color:var(--text)">Google Sheets API</strong>.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong style="color:var(--text)">Torne a planilha pública (somente leitura)</strong><br>
+        Na planilha, clique em <em>Compartilhar → Qualquer pessoa com o link → Leitor</em>. Isso permite que o dashboard leia os dados sem login.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong style="color:var(--text)">Preencha as configurações no topo do código</strong><br>
+        Edite o HTML e substitua:<br>
+        <code>SPREADSHEET_ID</code>1257S78wlx8gnlu0w676v-nN0Ir97Mg2YWsBwDXKIuEE<br>
+        <code>API_KEY</code> 13106943132-ov3ocr794dtjsn4uolda93j7n074d5su.apps.googleusercontent.com<br>
+        <code>SHEET_NAME</code> Contatos (ex: <code>Contatos</code>)
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong style="color:var(--text)">Hospede gratuitamente no GitHub Pages</strong><br>
+        Crie um repositório no GitHub → faça upload do arquivo HTML → vá em Settings → Pages → Source: main branch. Seu dashboard estará em <code>seu-usuario.github.io/seu-repo</code> em minutos.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <strong style="color:var(--text)">Alternativas de hospedagem rápida</strong><br>
+        Netlify Drop (arraste o arquivo em <a href="https://app.netlify.com/drop" target="_blank" style="color:var(--accent)">netlify.com/drop</a>) ou Vercel CLI (<code>npx vercel</code>). Ambos gratuitos e sem configuração.
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const CONFIG = {
+  SPREADSHEET_ID: '1257S78wlx8gnlu0w676v-nN0Ir97Mg2YWsBwDXKIuEE',
+  API_KEY: 'COLE_SUA_API_KEY_AQUI',
+  SHEET_NAME: 'Contatos',
+  SHEETS_URL: 'https://docs.google.com/spreadsheets/d/1257S78wlx8gnlu0w676v-nN0Ir97Mg2YWsBwDXKIuEE/edit'
+};
+
+let allData = [];
+let currentFilter = 'all';
+
+const DEMO_DATA = [
+  { Nome:'Ana Lima', Empresa:'Globo', Email:'ana@globo.com', Cargo:'Gerente RH', TipoCandidatura:'Analista de Dados', Status:'Sent', DataEnvio:'20/03/2026 10:54', Curriculo:'CURRICULO ALEXANDRE-ATUALIZADO-2025.pdf' },
+  { Nome:'Alexandre Santana', Empresa:'StartupXYZ', Email:'alexandre@startup.com', Cargo:'CTO', TipoCandidatura:'Desenvolvedor OutSystems', Status:'', DataEnvio:'', Curriculo:'' },
+  { Nome:'Marcio Costa', Empresa:'Bellinzoni', Email:'marcio@bellinzoni.com', Cargo:'Diretor', TipoCandidatura:'Analista de Dados', Status:'Sent', DataEnvio:'20/03/2026 10:52', Curriculo:'CURRICULO ALEXANDRE-ATUALIZADO-2025.pdf' },
+  { Nome:'Fernanda Rocha', Empresa:'TechCorp', Email:'fernanda@techcorp.com', Cargo:'Head de Dados', TipoCandidatura:'Especialista em IA', Status:'', DataEnvio:'', Curriculo:'' },
+  { Nome:'Roberto Silva', Empresa:'Itaú BBA', Email:'roberto@itau.com.br', Cargo:'Recrutador', TipoCandidatura:'Analista de Dados', Status:'Sent', DataEnvio:'19/03/2026 14:30', Curriculo:'CURRICULO ALEXANDRE-ATUALIZADO-2025.pdf' },
+];
+
+async function loadData() {
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('syncDot').style.background = 'var(--amber)';
+  try {
+    if (CONFIG.API_KEY === 'COLE_SUA_API_KEY_AQUI') {
+      await new Promise(r => setTimeout(r, 600));
+      allData = DEMO_DATA;
+      showToast('Exibindo dados de demonstração. Configure API_KEY para dados reais.', 'info');
+    } else {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}?key=${CONFIG.API_KEY}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const rows = json.values || [];
+      const headers = rows[0] || [];
+      allData = rows.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = row[i] || '');
+        return obj;
+      }).filter(r => r.Nome || r.Email);
+      showToast(`${allData.length} contatos carregados com sucesso!`, 'success');
+    }
+    renderAll();
+    document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    document.getElementById('syncDot').style.background = 'var(--green)';
+  } catch(e) {
+    document.getElementById('syncDot').style.background = 'var(--red)';
+    showToast('Erro ao buscar dados: ' + e.message, 'error');
+    allData = DEMO_DATA;
+    renderAll();
+  } finally {
+    document.getElementById('loading').classList.remove('show');
+  }
+}
+
+function renderAll() {
+  updateKPIs();
+  renderTable();
+  renderTypeBreakdown();
+  renderActivity();
+  updateProgress();
+}
+
+function updateKPIs() {
+  const total = allData.length;
+  const sent = allData.filter(r => r.Status === 'Sent').length;
+  const pending = total - sent;
+  const rate = total > 0 ? Math.round((sent/total)*100) : 0;
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-total-sub').textContent = `${total} na planilha`;
+  document.getElementById('kpi-sent').textContent = sent;
+  document.getElementById('kpi-sent-sub').textContent = `${rate}% do total`;
+  document.getElementById('kpi-pending').textContent = pending;
+  document.getElementById('kpi-pending-sub').textContent = pending === 0 ? 'todos enviados!' : `${pending} aguardando`;
+  document.getElementById('kpi-rate').textContent = rate + '%';
+  document.getElementById('kpi-rate-sub').textContent = `${sent} de ${total} enviados`;
+  setTimeout(() => {
+    document.getElementById('bar-total').style.width = '100%';
+    document.getElementById('bar-sent').style.width = rate + '%';
+    document.getElementById('bar-pending').style.width = (total > 0 ? (pending/total)*100 : 0) + '%';
+    document.getElementById('bar-rate').style.width = rate + '%';
+  }, 100);
+}
+
+function updateProgress() {
+  const total = allData.length;
+  const sent = allData.filter(r => r.Status === 'Sent').length;
+  const rate = total > 0 ? Math.round((sent/total)*100) : 0;
+  const circ = 239;
+  const offset = circ - (circ * rate / 100);
+  document.getElementById('ringCircle').style.strokeDashoffset = offset;
+  document.getElementById('ringPct').textContent = rate + '%';
+  document.getElementById('stat-sent').textContent = sent;
+  document.getElementById('stat-pending').textContent = total - sent;
+}
+
+let activeFilter = 'all';
+let searchVal = '';
+
+function setFilter(el, f) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = f;
+  renderTable();
+}
+
+function filterTable() {
+  searchVal = document.getElementById('searchInput').value.toLowerCase();
+  renderTable();
+}
+
+function renderTable() {
+  let data = allData;
+  if (activeFilter === 'sent') data = data.filter(r => r.Status === 'Sent');
+  if (activeFilter === 'pending') data = data.filter(r => r.Status !== 'Sent');
+  if (searchVal) data = data.filter(r =>
+    (r.Nome||'').toLowerCase().includes(searchVal) ||
+    (r.Empresa||'').toLowerCase().includes(searchVal) ||
+    (r.Email||'').toLowerCase().includes(searchVal) ||
+    (r.TipoCandidatura||'').toLowerCase().includes(searchVal)
+  );
+  document.getElementById('table-count').textContent = data.length + ' contatos';
+  const tbody = document.getElementById('tableBody');
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">◌</div><div class="empty-text">Nenhum contato encontrado</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map((r, i) => `
+    <tr onclick="openDetail(${allData.indexOf(r)})">
+      <td><div class="td-name">${r.Nome || '—'}</div></td>
+      <td><div class="td-company">${r.Empresa || '—'}</div></td>
+      <td>${r.TipoCandidatura ? `<span class="td-type">${r.TipoCandidatura}</span>` : '<span style="color:var(--text3);font-size:12px">não definido</span>'}</td>
+      <td>${r.Status === 'Sent'
+        ? `<span class="badge sent"><span class="badge-dot"></span>Enviado</span>`
+        : `<span class="badge pending"><span class="badge-dot"></span>Pendente</span>`}</td>
+      <td><div class="td-date">${r.DataEnvio || '—'}</div></td>
+      <td><div style="font-size:11px;color:var(--text3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.Curriculo || '—'}</div></td>
+    </tr>
+  `).join('');
+}
+
+const TYPE_COLORS = ['#c9a84c','#60a5fa','#4ade80','#f472b6','#a78bfa','#fb923c','#34d399','#f87171'];
+function renderTypeBreakdown() {
+  const counts = {};
+  allData.forEach(r => {
+    const t = r.TipoCandidatura || 'Não definido';
+    counts[t] = (counts[t] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+  const max = sorted[0]?.[1] || 1;
+  const container = document.getElementById('typeBreakdown');
+  if (sorted.length === 0) {
+    container.innerHTML = `<div class="type-row"><div class="type-name" style="color:var(--text3)">Sem dados</div></div>`;
+    return;
+  }
+  container.innerHTML = sorted.map(([name, count], i) => `
+    <div class="type-row">
+      <div class="type-dot" style="background:${TYPE_COLORS[i % TYPE_COLORS.length]}"></div>
+      <div class="type-name">${name}</div>
+      <div class="type-count" style="color:${TYPE_COLORS[i % TYPE_COLORS.length]}">${count}</div>
+      <div class="type-bar-wrap">
+        <div class="type-bar">
+          <div class="type-bar-fill" style="width:${Math.round((count/max)*100)}%;background:${TYPE_COLORS[i % TYPE_COLORS.length]}"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderActivity() {
+  const sent = allData.filter(r => r.Status === 'Sent' && r.DataEnvio).sort((a,b) => {
+    const parse = s => { const [d,t] = s.split(' '); const [day,mon,yr] = d.split('/'); return new Date(`${yr}-${mon}-${day}T${t||'00:00'}`); };
+    return parse(b.DataEnvio) - parse(a.DataEnvio);
+  }).slice(0, 6);
+  const container = document.getElementById('activityFeed');
+  if (sent.length === 0) {
+    container.innerHTML = `<div class="activity-item"><div class="activity-body"><div class="activity-text" style="color:var(--text3)">Nenhuma atividade ainda</div></div></div>`;
+    return;
+  }
+  container.innerHTML = sent.map(r => `
+    <div class="activity-item">
+      <div class="activity-icon sent">✓</div>
+      <div class="activity-body">
+        <div class="activity-text">Email enviado para <strong>${r.Nome}</strong> — ${r.Empresa}</div>
+        <div class="activity-time">${r.DataEnvio} · ${r.TipoCandidatura || 'Candidatura'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openDetail(idx) {
+  const r = allData[idx];
+  if (!r) return;
+  document.getElementById('modal-title').textContent = r.Nome || 'Contato';
+  const fields = [
+    ['Nome', r.Nome], ['Empresa', r.Empresa], ['Email', r.Email],
+    ['Cargo', r.Cargo], ['Tipo Candidatura', r.TipoCandidatura],
+    ['Status', r.Status === 'Sent' ? '✓ Enviado' : '⏳ Pendente'],
+    ['Data Envio', r.DataEnvio || '—'], ['Currículo', r.Curriculo || '—']
+  ];
+  document.getElementById('modal-body').innerHTML = fields.map(([k,v]) => `
+    <div class="detail-row">
+      <div class="detail-key">${k}</div>
+      <div class="detail-val">${v || '—'}</div>
+    </div>
+  `).join('');
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('show');
+}
+
+function openSheets() {
+  window.open(CONFIG.SHEETS_URL, '_blank');
+}
+
+function exportCSV() {
+  if (allData.length === 0) { showToast('Sem dados para exportar', 'error'); return; }
+  const headers = ['Nome','Empresa','Email','Cargo','TipoCandidatura','Status','DataEnvio','Curriculo'];
+  const rows = [headers, ...allData.map(r => headers.map(h => `"${(r[h]||'').replace(/"/g,'""')}"` ))];
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `job-outreach-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('CSV exportado com sucesso!', 'success');
+}
+
+let toastTimer;
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+loadData();
+setInterval(loadData, 60000);
+</script>
+</body>
+</html>
